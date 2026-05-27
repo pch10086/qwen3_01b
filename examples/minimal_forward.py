@@ -1,5 +1,5 @@
 """
-最小前向：随机初始化的 Qwen3-0.6B 结构，验证 logits 形状。
+最小前向：随机初始化的 Qwen3 结构，验证 logits 形状。
 在包含 `qwen3_06b_from_scratch` 父目录的仓库根下执行:
   python -m qwen3_06b_from_scratch.examples.minimal_forward
 或:
@@ -15,14 +15,14 @@ if str(_ROOT) not in sys.path:
 
 import torch
 
-from qwen3_06b_from_scratch import QWEN3_06B_CONFIG, Qwen3Model
+from qwen3_06b_from_scratch import QWEN3_CONFIG, Qwen3Model
 
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # 开发机内存紧张时可改小 max_seq
     max_seq = 32
-    cfg = {**QWEN3_06B_CONFIG, "context_length": max(2048, max_seq), "dtype": torch.bfloat16}
+    cfg = {**QWEN3_CONFIG, "context_length": max(2048, max_seq), "dtype": torch.bfloat16}
     model = Qwen3Model(cfg).to(device)
     model.eval()
 

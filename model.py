@@ -1,7 +1,7 @@
 # Copyright (c) Sebastian Raschka under Apache License 2.0 (see LICENSE.txt).
 # Extracted from https://github.com/rasbt/LLMs-from-scratch
 
-"""Qwen3-0.6B 因果语言模型：词嵌入 → N 个 Transformer 块 → 最终 RMSNorm → 输出头。"""
+"""Qwen3 因果语言模型：词嵌入 → N 个 Transformer 块 → 最终 RMSNorm → 输出头。"""
 
 import torch
 import torch.nn as nn

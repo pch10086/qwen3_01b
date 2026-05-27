@@ -1,4 +1,4 @@
-# Qwen3-0.6B 从零实现（训练 + 推理）
+# Qwen3 从零实现（训练 + 推理）
 
 从 [LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch) 抽取并补全为**可独立部署**的包：模型结构、自监督预训练循环、自回归生成与检查点，**不依赖预训练权重**（你自训或从自己的 `checkpoint_last.pt` 推理）。
 
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 | 模块 | 说明 |
 |------|------|
-| `config.py` | `QWEN3_06B_CONFIG`；`QWEN3_SMOKE_CONFIG` 仅用于本机/CPU 管线冒烟 |
+| `config.py` | `QWEN3_CONFIG`；`QWEN3_SMOKE_CONFIG` 仅用于本机/CPU 管线冒烟 |
 | `rope.py` / `norm.py` | RoPE、RMSNorm |
 | `attention.py` / `feed_forward.py` / `block.py` | GQA、SwiGLU、Transformer 块 |
 | `model.py` | `Qwen3Model` |
@@ -127,10 +127,10 @@ CUDA_VISIBLE_DEVICES=1,6,7 torchrun --standalone --nproc_per_node=3 \
 - `checkpoint_step_*.pt`：按 `--save_every` 保存。
 - `checkpoint_last.pt`：最近 checkpoint，支持 `--resume_from`。
 
-## 小语料/本地训练（0.6B 或 tiny）
+## 小语料/本地训练
 
 1. 准备**纯文本**语料：`.txt` 单文件，或**同一目录下**多个 `.txt`。  
-2. 准备与 **vocab 一致** 的 `tokenizer.json`（不下载模型权重也可从 HuggingFace 只取分词器文件，使 `vocab_size=151936` 与 `QWEN3_06B_CONFIG` 一致）。  
+2. 准备与 **vocab 一致** 的 `tokenizer.json`。
 3. 在**含本包的上级目录**下执行（例如工程根为 `NLP大作业`）：
 
 ```bash
@@ -147,11 +147,11 @@ python -m qwen3_06b.cli_train \
   --device cuda
 ```
 
-- 显存：0.6B 全参训练需**大显存 GPU**；可关混合精度：`--no_amp`（一般不建议在 A800 上关）。  
+- 显存：真实训练通常需要大显存 GPU；可关混合精度：`--no_amp`（一般不建议在 A800 上关）。  
 - `--context_length` 可覆盖默认 40960 的 RoPE 长度（需 `max_length < context_length`）。  
 - 每个 epoch 会写 `checkpoint_eN.pt`，结束写 `checkpoint_last.pt`。
 
-## 本机/CPU 冒烟（非 0.6B）
+## 本机/CPU 冒烟
 
 ```bash
 cd /path/to/NLP大作业
@@ -162,7 +162,7 @@ python -m qwen3_06b.cli_train \
   --epochs 1 --synthetic_samples 8 --max_length 32 --eval_freq 0
 ```
 
-`--tiny` 使用 `QWEN3_SMOKE_CONFIG`（约数层/小词表），**与真实 0.6B 结构不同**，仅验证脚本与依赖。
+`--tiny` 使用 `QWEN3_SMOKE_CONFIG`（小层数/小词表），仅验证脚本与依赖。
 
 ## 推理（自训 checkpoint）
 
@@ -187,7 +187,7 @@ python -m qwen3_06b.cli_infer \
 ## 以库方式调用
 
 ```python
-from qwen3_06b import QWEN3_06B_CONFIG, Qwen3Model, train, get_device
+from qwen3_06b import QWEN3_CONFIG, Qwen3Model, train, get_device
 from qwen3_06b.data import SyntheticLMDataset, make_dataloader
 # 构建 DataLoader 后调用 training.train(...)
 ```

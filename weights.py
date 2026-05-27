@@ -3,14 +3,14 @@
 
 """
 将 HuggingFace / safetensors 的 Qwen3 权重名映射到本实现的模块。
-仅覆盖 0.6B 稠密 FFN；需先自行下载官方权重为 state dict 或 safetensors。
+需先自行下载兼容结构的权重为 state dict 或 safetensors。
 """
 
 import torch
 
 
 def load_weights_into_qwen(model, param_config, params):
-    """param_config: 与 QWEN3_06B_CONFIG 同结构的 dict；params: 名字 -> tensor 的映射。"""
+    """param_config: 与 QWEN3_CONFIG 同结构的 dict；params: 名字 -> tensor 的映射。"""
 
     def assign(left, right, tensor_name="unknown"):
         if left.shape != right.shape:

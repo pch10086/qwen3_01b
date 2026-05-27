@@ -26,7 +26,7 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from qwen3_06b.config import QWEN3_06B_CONFIG, QWEN3_SMOKE_CONFIG
+from qwen3_06b.config import QWEN3_CONFIG, QWEN3_SMOKE_CONFIG
 from qwen3_06b.data import SyntheticLMDataset, TokenShardDataset, load_token_manifest, make_dataloader
 from qwen3_06b.model import Qwen3Model
 from qwen3_06b.tokenizer_utils import load_tokenizer_from_json
@@ -155,7 +155,7 @@ def main():
         else:
             device = torch.device(args.device)
 
-        cfg0 = QWEN3_SMOKE_CONFIG if args.tiny else QWEN3_06B_CONFIG
+        cfg0 = QWEN3_SMOKE_CONFIG if args.tiny else QWEN3_CONFIG
         cfg = dict(cfg0)
         vocab_size = infer_vocab_size(args.tokenizer_json)
         if vocab_size is not None:

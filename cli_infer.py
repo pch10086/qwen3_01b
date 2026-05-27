@@ -26,7 +26,7 @@ from qwen3_06b.training import build_model_from_checkpoint, get_device
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Qwen3-0.6B 推理")
+    p = argparse.ArgumentParser(description="Qwen3 推理")
     p.add_argument("--checkpoint", type=str, required=True)
     p.add_argument("--prompt", type=str, default="")
     p.add_argument("--tokenizer_json", type=str, default=None, help="HuggingFace tokenizer.json；与 --raw_random 互斥")

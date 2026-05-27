@@ -1,7 +1,7 @@
 # Copyright (c) Sebastian Raschka under Apache License 2.0 (see LICENSE.txt).
 # Extracted from https://github.com/rasbt/LLMs-from-scratch
 
-"""SwiGLU 前馈：gate_proj 与 up_proj 分支相乘后经 down_proj。0.6B 为稠密 FFN，无 MoE。"""
+"""SwiGLU 前馈：gate_proj 与 up_proj 分支相乘后经 down_proj。"""
 
 import torch.nn as nn
 import torch.nn.functional as F

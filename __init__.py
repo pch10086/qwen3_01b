@@ -1,9 +1,9 @@
 # Copyright (c) Sebastian Raschka under Apache License 2.0 (see LICENSE.txt).
 # Extracted from https://github.com/rasbt/LLMs-from-scratch
 
-"""Qwen3-0.6B 从零实现（结构拆分自 llms_from_scratch.qwen3）。"""
+"""Qwen3 从零实现（结构拆分自 llms_from_scratch.qwen3）。"""
 
-from .config import QWEN3_06B_CONFIG, QWEN3_SMOKE_CONFIG
+from .config import QWEN3_CONFIG, QWEN3_SMOKE_CONFIG
 from .data import (
     LMDataset,
     SyntheticLMDataset,
@@ -31,7 +31,7 @@ from .training import (
 )
 
 __all__ = [
-    "QWEN3_06B_CONFIG",
+    "QWEN3_CONFIG",
     "QWEN3_SMOKE_CONFIG",
     "Qwen3Model",
     "load_weights_into_qwen",

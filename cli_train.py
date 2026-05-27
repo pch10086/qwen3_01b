@@ -25,7 +25,7 @@ if str(_ROOT) not in sys.path:
 import torch
 from torch.utils.data import random_split
 
-from qwen3_06b.config import QWEN3_06B_CONFIG, QWEN3_SMOKE_CONFIG
+from qwen3_06b.config import QWEN3_CONFIG, QWEN3_SMOKE_CONFIG
 from qwen3_06b.data import (
     LMDataset,
     SyntheticLMDataset,
@@ -39,7 +39,7 @@ from qwen3_06b.training import get_device, set_seed, train
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Qwen3-0.6B 自训练")
+    p = argparse.ArgumentParser(description="Qwen3 自训练")
     p.add_argument("--synthetic", action="store_true", help="不读语料，用随机 token 做管线测试")
     p.add_argument("--data", type=str, default=None, help="单个 .txt 或语料目录（多 .txt）")
     p.add_argument("--tokenizer_json", type=str, default=None, help="HuggingFace 风格 tokenizer.json")
@@ -61,7 +61,7 @@ def parse_args():
     p.add_argument(
         "--tiny",
         action="store_true",
-        help="用极小配置试跑管线（非 0.6B），适合本机 CPU 冒烟；部署前请去掉该开关做真实 0.6B",
+        help="用极小配置试跑管线，适合本机 CPU 冒烟；部署前请去掉该开关做真实训练",
     )
     p.add_argument(
         "--context_length",
@@ -81,7 +81,7 @@ def main():
     set_seed(args.seed)
     device = get_device(None if args.device == "auto" else args.device)
 
-    cfg0 = QWEN3_SMOKE_CONFIG if args.tiny else QWEN3_06B_CONFIG
+    cfg0 = QWEN3_SMOKE_CONFIG if args.tiny else QWEN3_CONFIG
     cfg = dict(cfg0)
     if args.context_length is not None:
         cfg["context_length"] = args.context_length
