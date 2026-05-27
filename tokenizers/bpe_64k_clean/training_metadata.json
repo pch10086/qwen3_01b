@@ -1,0 +1,52 @@
+{
+  "vocab_size": 64000,
+  "requested_vocab_size": 64000,
+  "model": "byte-level-bpe",
+  "special_tokens": {
+    "<|unk|>": 0,
+    "<|endoftext|>": 1,
+    "<|im_start|>": 2,
+    "<|im_end|>": 3,
+    "<|pad|>": 4
+  },
+  "raw_dir": "/home/public/bjh/dym/qwen3_01b/data/raw",
+  "sample_chars": 200000000,
+  "source_char_budgets": {
+    "fineweb_edu": 70000000,
+    "finemath_or_openwebmath": 40000000,
+    "pes2o": 40000000,
+    "pg19": 30000000,
+    "wikipedia_en": 20000000
+  },
+  "source_stats": {
+    "fineweb_edu": {
+      "docs": 14766,
+      "chars": 70000000,
+      "duplicates": 0
+    },
+    "finemath_or_openwebmath": {
+      "docs": 7969,
+      "chars": 40000000,
+      "duplicates": 0
+    },
+    "pes2o": {
+      "docs": 1468,
+      "chars": 40000000,
+      "duplicates": 0
+    },
+    "pg19": {
+      "docs": 105,
+      "chars": 30000000,
+      "duplicates": 0
+    },
+    "wikipedia_en": {
+      "docs": 8387,
+      "chars": 20000000,
+      "duplicates": 0
+    }
+  },
+  "total_docs": 32695,
+  "total_chars": 200000000,
+  "dedup": true,
+  "created_at_unix": 1779873773
+}
