@@ -1,0 +1,6 @@
+_runs_smoke/
+__pycache__/
+*.pyc
+
+.codegraph/
+.cursor/
