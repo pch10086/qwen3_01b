@@ -1,12 +1,12 @@
 # Copyright (c) Sebastian Raschka under Apache License 2.0.
 """
-预训练（或继续训练）入口。在 **工程根目录**（含 `qwen3_06b` 的上一级）执行:
+预训练（或继续训练）入口。在 **工程根目录**（含 `qwen3_01b` 的上一级）执行:
 
-  python -m qwen3_06b.cli_train --synthetic --epochs 1 --out_dir runs/smoke
+  python -m qwen3_01b.cli_train --synthetic --epochs 1 --out_dir runs/smoke
 
 真实语料 + 分词器（ tokenizer.json 与 Qwen3 词表一致时 vocab=151936）:
 
-  python -m qwen3_06b.cli_train \\
+  python -m qwen3_01b.cli_train \\
     --data /path/corpus.txt \\
     --tokenizer_json /path/to/tokenizer.json \\
     --out_dir runs/exp1
@@ -25,17 +25,17 @@ if str(_ROOT) not in sys.path:
 import torch
 from torch.utils.data import random_split
 
-from qwen3_06b.config import QWEN3_CONFIG, QWEN3_SMOKE_CONFIG
-from qwen3_06b.data import (
+from qwen3_01b.config import QWEN3_CONFIG, QWEN3_SMOKE_CONFIG
+from qwen3_01b.data import (
     LMDataset,
     SyntheticLMDataset,
     build_token_ids_from_corpus,
     load_corpus_text,
     make_dataloader,
 )
-from qwen3_06b.model import Qwen3Model
-from qwen3_06b.tokenizer_utils import load_tokenizer_from_json
-from qwen3_06b.training import get_device, set_seed, train
+from qwen3_01b.model import Qwen3Model
+from qwen3_01b.tokenizer_utils import load_tokenizer_from_json
+from qwen3_01b.training import get_device, set_seed, train
 
 
 def parse_args():

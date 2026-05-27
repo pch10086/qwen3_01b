@@ -2,7 +2,7 @@
 """
 自训练检查点上的自回归生成。工程根下:
 
-  python -m qwen3_06b.cli_infer \\
+  python -m qwen3_01b.cli_infer \\
     --checkpoint runs/exp1/checkpoint_last.pt \\
     --prompt "Hello" \\
     --tokenizer_json /path/to/tokenizer.json
@@ -20,9 +20,9 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from qwen3_06b.generate import generate, trim_input_to_context
-from qwen3_06b.tokenizer_utils import load_tokenizer_from_json
-from qwen3_06b.training import build_model_from_checkpoint, get_device
+from qwen3_01b.generate import generate, trim_input_to_context
+from qwen3_01b.tokenizer_utils import load_tokenizer_from_json
+from qwen3_01b.training import build_model_from_checkpoint, get_device
 
 
 def parse_args():

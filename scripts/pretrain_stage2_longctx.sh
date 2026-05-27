@@ -4,14 +4,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_ROOT="$(cd "${PKG_DIR}/.." && pwd)"
+PACKAGE_NAME="${PACKAGE_NAME:-$(basename "${PKG_DIR}")}"
 cd "${PROJECT_ROOT}"
 
 GPU_IDS="${GPU_IDS:-0}"
 NPROC_PER_NODE="${NPROC_PER_NODE:-1}"
-TOKEN_MANIFEST="${TOKEN_MANIFEST:-data/processed/pretrain_10b_bpe64k/manifest.json}"
-TOKENIZER_JSON="${TOKENIZER_JSON:-qwen3_06b/tokenizers/bpe_64k_clean/tokenizer.json}"
-RESUME_FROM="${RESUME_FROM:-qwen3_06b/runs/stage1_base_seq2048/checkpoint_last.pt}"
-OUT_DIR="${OUT_DIR:-qwen3_06b/runs/stage2_longctx_seq4096}"
+TOKEN_MANIFEST="${TOKEN_MANIFEST:-${PACKAGE_NAME}/data/processed/pretrain_en_longctx_500m_bpe64k/manifest.json}"
+TOKENIZER_JSON="${TOKENIZER_JSON:-${PACKAGE_NAME}/tokenizers/bpe_64k_clean/tokenizer.json}"
+RESUME_FROM="${RESUME_FROM:-${PACKAGE_NAME}/runs/stage1_base_seq2048/checkpoint_last.pt}"
+OUT_DIR="${OUT_DIR:-${PACKAGE_NAME}/runs/stage2_longctx_seq4096}"
 NO_LOAD_OPTIMIZER="${NO_LOAD_OPTIMIZER:-1}"
 RESET_PROGRESS="${RESET_PROGRESS:-1}"
 
@@ -34,7 +35,7 @@ export NCCL_P2P_DISABLE="${NCCL_P2P_DISABLE:-1}"
 export NCCL_IB_DISABLE="${NCCL_IB_DISABLE:-1}"
 
 args=(
-  -m qwen3_06b.cli_pretrain
+  -m "${PACKAGE_NAME}.cli_pretrain"
   --token_manifest "${TOKEN_MANIFEST}"
   --tokenizer_json "${TOKENIZER_JSON}"
   --out_dir "${OUT_DIR}"
@@ -64,8 +65,11 @@ if [[ "${RESET_PROGRESS}" == "1" ]]; then
 fi
 
 echo "Stage 2 long-context continued pretraining"
+echo "  package: ${PACKAGE_NAME}"
 echo "  GPUs: ${GPU_IDS}  nproc: ${NPROC_PER_NODE}"
 echo "  resume_from=${RESUME_FROM}"
+echo "  token_manifest=${TOKEN_MANIFEST}"
+echo "  tokenizer_json=${TOKENIZER_JSON}"
 echo "  seq_len=${SEQ_LEN} context_length=${CONTEXT_LENGTH}"
 echo "  out_dir=${OUT_DIR}"
 

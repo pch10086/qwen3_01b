@@ -4,10 +4,10 @@
 
 典型用法:
 
-  python -m qwen3_06b.cli_pretrain \
-    --token_manifest data/processed/pretrain_10b_bpe64k/manifest.json \
-    --tokenizer_json qwen3_06b/tokenizers/bpe_64k_clean/tokenizer.json \
-    --out_dir qwen3_06b/runs/pretrain_base \
+  python -m qwen3_01b.cli_pretrain \
+    --token_manifest qwen3_01b/data/processed/pretrain_en_10b_bpe64k/manifest.json \
+    --tokenizer_json qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json \
+    --out_dir qwen3_01b/runs/pretrain_base \
     --seq_len 2048 --batch_size 1 --grad_accum_steps 32
 """
 
@@ -26,11 +26,11 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from qwen3_06b.config import QWEN3_CONFIG, QWEN3_SMOKE_CONFIG
-from qwen3_06b.data import SyntheticLMDataset, TokenShardDataset, load_token_manifest, make_dataloader
-from qwen3_06b.model import Qwen3Model
-from qwen3_06b.tokenizer_utils import load_tokenizer_from_json
-from qwen3_06b.training import (
+from qwen3_01b.config import QWEN3_CONFIG, QWEN3_SMOKE_CONFIG
+from qwen3_01b.data import SyntheticLMDataset, TokenShardDataset, load_token_manifest, make_dataloader
+from qwen3_01b.model import Qwen3Model
+from qwen3_01b.tokenizer_utils import load_tokenizer_from_json
+from qwen3_01b.training import (
     cleanup_distributed,
     get_world_size,
     init_distributed_if_needed,

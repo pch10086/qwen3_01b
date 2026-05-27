@@ -129,7 +129,7 @@ data/
       ...
 ```
 
-The final manifests should follow the format already supported by `qwen3_06b.cli_pretrain`:
+The final manifests should follow the format already supported by `qwen3_01b.cli_pretrain`:
 
 ```json
 {

@@ -1,21 +1,21 @@
 """
 最小前向：随机初始化的 Qwen3 结构，验证 logits 形状。
-在包含 `qwen3_06b_from_scratch` 父目录的仓库根下执行:
-  python -m qwen3_06b_from_scratch.examples.minimal_forward
+在包含 `qwen3_01b` 父目录的仓库根下执行:
+  python -m qwen3_01b.examples.minimal_forward
 或:
-  python qwen3_06b_from_scratch/examples/minimal_forward.py
+  python qwen3_01b/examples/minimal_forward.py
 """
 import sys
 from pathlib import Path
 
-# 本文件: .../qwen3_06b_from_scratch/examples/minimal_forward.py -> parents[2] 为上级工程根
+# 本文件: .../qwen3_01b/examples/minimal_forward.py -> parents[2] 为上级工程根
 _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 import torch
 
-from qwen3_06b_from_scratch import QWEN3_CONFIG, Qwen3Model
+from qwen3_01b import QWEN3_CONFIG, Qwen3Model
 
 
 def main():

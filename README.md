@@ -55,9 +55,9 @@ cd /path/to/NLP大作业
 
 GPU_IDS=1,6,7 \
 NPROC_PER_NODE=3 \
-TOKEN_MANIFEST=data/processed/pretrain_10b_bpe64k/manifest.json \
-TOKENIZER_JSON=qwen3_06b/tokenizers/bpe_64k_clean/tokenizer.json \
-OUT_DIR=qwen3_06b/runs/stage1_base_seq2048 \
+TOKEN_MANIFEST=qwen3_01b/data/processed/pretrain_en_10b_bpe64k/manifest.json \
+TOKENIZER_JSON=qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json \
+OUT_DIR=qwen3_01b/runs/stage1_base_seq2048 \
 SEQ_LEN=2048 \
 CONTEXT_LENGTH=4096 \
 BATCH_SIZE=6 \
@@ -77,10 +77,10 @@ cd /path/to/NLP大作业
 
 GPU_IDS=1,6,7 \
 NPROC_PER_NODE=3 \
-TOKEN_MANIFEST=data/processed/pretrain_10b_bpe64k/manifest.json \
-TOKENIZER_JSON=qwen3_06b/tokenizers/bpe_64k_clean/tokenizer.json \
-RESUME_FROM=qwen3_06b/runs/stage1_base_seq2048/checkpoint_last.pt \
-OUT_DIR=qwen3_06b/runs/stage2_longctx_seq4096 \
+TOKEN_MANIFEST=qwen3_01b/data/processed/pretrain_en_longctx_500m_bpe64k/manifest.json \
+TOKENIZER_JSON=qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json \
+RESUME_FROM=qwen3_01b/runs/stage1_base_seq2048/checkpoint_last.pt \
+OUT_DIR=qwen3_01b/runs/stage2_longctx_seq4096 \
 SEQ_LEN=4096 \
 CONTEXT_LENGTH=8192 \
 BATCH_SIZE=3 \
@@ -102,10 +102,10 @@ Stage 2 脚本默认带 `--no_load_optimizer --reset_progress`：只加载 Stage
 
 ```bash
 CUDA_VISIBLE_DEVICES=1,6,7 torchrun --standalone --nproc_per_node=3 \
-  -m qwen3_06b.cli_pretrain \
-  --token_manifest data/processed/pretrain_10b_bpe64k/manifest.json \
-  --tokenizer_json qwen3_06b/tokenizers/bpe_64k_clean/tokenizer.json \
-  --out_dir qwen3_06b/runs/stage1_base_seq2048 \
+  -m qwen3_01b.cli_pretrain \
+  --token_manifest qwen3_01b/data/processed/pretrain_en_10b_bpe64k/manifest.json \
+  --tokenizer_json qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json \
+  --out_dir qwen3_01b/runs/stage1_base_seq2048 \
   --seq_len 2048 \
   --context_length 4096 \
   --batch_size 6 \
@@ -134,7 +134,7 @@ CUDA_VISIBLE_DEVICES=1,6,7 torchrun --standalone --nproc_per_node=3 \
 3. 在**含本包的上级目录**下执行（例如工程根为 `NLP大作业`）：
 
 ```bash
-python -m qwen3_06b.cli_train \
+python -m qwen3_01b.cli_train \
   --data /path/to/corpus.txt \
   --tokenizer_json /path/to/tokenizer.json \
   --out_dir /path/to/runs/exp1 \
@@ -156,9 +156,9 @@ python -m qwen3_06b.cli_train \
 ```bash
 cd /path/to/NLP大作业
 
-python -m qwen3_06b.cli_train \
+python -m qwen3_01b.cli_train \
   --synthetic --tiny \
-  --out_dir qwen3_06b/_runs_smoke \
+  --out_dir qwen3_01b/_runs_smoke \
   --epochs 1 --synthetic_samples 8 --max_length 32 --eval_freq 0
 ```
 
@@ -167,7 +167,7 @@ python -m qwen3_06b.cli_train \
 ## 推理（自训 checkpoint）
 
 ```bash
-python -m qwen3_06b.cli_infer \
+python -m qwen3_01b.cli_infer \
   --checkpoint /path/to/checkpoint_last.pt \
   --prompt "你好" \
   --tokenizer_json /path/to/tokenizer.json \
@@ -179,7 +179,7 @@ python -m qwen3_06b.cli_infer \
 只测张量形状、不加载分词器：
 
 ```bash
-python -m qwen3_06b.cli_infer \
+python -m qwen3_01b.cli_infer \
   --checkpoint /path/to/checkpoint_last.pt \
   --raw_random --max_new_tokens 8
 ```
@@ -187,8 +187,8 @@ python -m qwen3_06b.cli_infer \
 ## 以库方式调用
 
 ```python
-from qwen3_06b import QWEN3_CONFIG, Qwen3Model, train, get_device
-from qwen3_06b.data import SyntheticLMDataset, make_dataloader
+from qwen3_01b import QWEN3_CONFIG, Qwen3Model, train, get_device
+from qwen3_01b.data import SyntheticLMDataset, make_dataloader
 # 构建 DataLoader 后调用 training.train(...)
 ```
 
