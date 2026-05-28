@@ -20,6 +20,7 @@ class TransformerBlock(nn.Module):
             num_kv_groups=cfg["n_kv_groups"],
             qk_norm=cfg["qk_norm"],
             dtype=cfg["dtype"],
+            attention_impl=cfg.get("attention_impl", "flash"),
         )
         self.ff = FeedForward(cfg)
         self.norm1 = RMSNorm(cfg["emb_dim"], eps=1e-6)

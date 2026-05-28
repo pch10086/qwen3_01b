@@ -16,6 +16,7 @@ QWEN3_CONFIG = {
     "qk_norm": True,
     "n_kv_groups": 4,
     "rope_base": 1_000_000.0,
+    "attention_impl": "flash",
     "dtype": torch.bfloat16,
 }
 
@@ -31,5 +32,6 @@ QWEN3_SMOKE_CONFIG = {
     "qk_norm": True,
     "n_kv_groups": 2,
     "rope_base": 1_000_000.0,
+    "attention_impl": "flash",
     "dtype": torch.bfloat16,
 }

@@ -1,23 +1,42 @@
 # Copyright (c) Sebastian Raschka under Apache License 2.0 (see LICENSE.txt).
 # Extracted from https://github.com/rasbt/LLMs-from-scratch
 
-"""分组查询注意力 GQA：K/V 头数少于 Q 头数，通过 repeat_interleave 广播。"""
+"""分组查询注意力 GQA：CUDA 默认使用 PyTorch Flash Attention 后端。"""
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
+try:
+    from torch.nn.attention import SDPBackend, sdpa_kernel
+except ImportError:  # pragma: no cover - older PyTorch fallback
+    SDPBackend = None
+    sdpa_kernel = None
 
 from .norm import RMSNorm
 from .rope import apply_rope
 
 
 class GroupedQueryAttention(nn.Module):
-    def __init__(self, d_in, num_heads, num_kv_groups, head_dim=None, qk_norm=False, dtype=None):
+    def __init__(
+        self,
+        d_in,
+        num_heads,
+        num_kv_groups,
+        head_dim=None,
+        qk_norm=False,
+        dtype=None,
+        attention_impl="flash",
+    ):
         super().__init__()
         assert num_heads % num_kv_groups == 0, "num_heads must be divisible by num_kv_groups"
+        if attention_impl not in {"flash", "sdpa", "manual"}:
+            raise ValueError("attention_impl must be 'flash', 'sdpa', or 'manual'")
 
         self.num_heads = num_heads
         self.num_kv_groups = num_kv_groups
         self.group_size = num_heads // num_kv_groups
+        self.attention_impl = attention_impl
 
         if head_dim is None:
             assert d_in % num_heads == 0, "`d_in` must be divisible by `num_heads` if `head_dim` is not set"
@@ -59,6 +78,34 @@ class GroupedQueryAttention(nn.Module):
 
         keys = keys.repeat_interleave(self.group_size, dim=1)
         values = values.repeat_interleave(self.group_size, dim=1)
+
+        if self.attention_impl in {"flash", "sdpa"}:
+            if (
+                self.attention_impl == "flash"
+                and queries.is_cuda
+                and sdpa_kernel is not None
+                and SDPBackend is not None
+            ):
+                with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
+                    context = F.scaled_dot_product_attention(
+                        queries,
+                        keys,
+                        values,
+                        attn_mask=None,
+                        dropout_p=0.0,
+                        is_causal=True,
+                    )
+            else:
+                context = F.scaled_dot_product_attention(
+                    queries,
+                    keys,
+                    values,
+                    attn_mask=None,
+                    dropout_p=0.0,
+                    is_causal=True,
+                )
+            context = context.transpose(1, 2).reshape(b, num_tokens, self.d_out)
+            return self.out_proj(context)
 
         attn_scores = queries @ keys.transpose(2, 3)
         attn_scores = attn_scores.masked_fill(mask, -torch.inf)
