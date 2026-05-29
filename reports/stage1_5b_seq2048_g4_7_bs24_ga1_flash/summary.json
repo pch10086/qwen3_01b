@@ -1,0 +1,21 @@
+{
+  "source_log": "/home/public/bjh/dym/qwen3_01b/runs/stage1_5b_seq2048_g4_7_bs24_ga1_flash/train_log.jsonl",
+  "records": 2543,
+  "first_time": "2026-05-28T11:24:26+08:00",
+  "last_time": "2026-05-29T10:23:07+08:00",
+  "elapsed_hours": 22.978055555555557,
+  "first_step": 20,
+  "last_step": 50860,
+  "tokens_seen_last": 4999741440,
+  "tokens_seen_last_b": 4.99974144,
+  "loss_first": 11.224117279052734,
+  "loss_last": 3.4376485347747803,
+  "loss_min": 3.2305312156677246,
+  "loss_first50_avg": 7.312899799346924,
+  "loss_last50_avg": 3.511812915802002,
+  "lr_first": 5.999999999999999e-06,
+  "lr_last": 3.000000428713036e-05,
+  "lr_max": 0.0003,
+  "tok_per_s_median": 61831.182134467286,
+  "wall_avg_tok_per_s_from_tokens": 60417.25027502085
+}
