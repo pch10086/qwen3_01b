@@ -7,20 +7,57 @@ PROJECT_ROOT="$(cd "${PKG_DIR}/.." && pwd)"
 PACKAGE_NAME="${PACKAGE_NAME:-$(basename "${PKG_DIR}")}"
 cd "${PROJECT_ROOT}"
 
+STAGE2_PHASE="${STAGE2_PHASE:-4k}"
+ROPE_SCALING_TYPE="${ROPE_SCALING_TYPE:-none}"
+ROPE_ORIGINAL_CONTEXT_LENGTH="${ROPE_ORIGINAL_CONTEXT_LENGTH:-4096}"
+ROPE_SCALING_FACTOR="${ROPE_SCALING_FACTOR:-}"
+YARN_BETA_FAST="${YARN_BETA_FAST:-}"
+YARN_BETA_SLOW="${YARN_BETA_SLOW:-}"
+YARN_ATTENTION_FACTOR="${YARN_ATTENTION_FACTOR:-}"
+
+case "${STAGE2_PHASE}" in
+  4k)
+    DEFAULT_TOKEN_MANIFEST="${PACKAGE_NAME}/data/processed/pretrain_en_longctx_4k_360m_bpe64k/manifest.json"
+    DEFAULT_OUT_DIR="${PACKAGE_NAME}/runs/stage2_4k_seq4096_rope_${ROPE_SCALING_TYPE}"
+    DEFAULT_SEQ_LEN=4096
+    DEFAULT_CONTEXT_LENGTH=8192
+    DEFAULT_MAX_TRAIN_TOKENS=360000000
+    ;;
+  8k)
+    DEFAULT_TOKEN_MANIFEST="${PACKAGE_NAME}/data/processed/pretrain_en_longctx_8k_180m_bpe64k/manifest.json"
+    DEFAULT_OUT_DIR="${PACKAGE_NAME}/runs/stage2_8k_seq8192_rope_${ROPE_SCALING_TYPE}"
+    DEFAULT_SEQ_LEN=8192
+    DEFAULT_CONTEXT_LENGTH=16384
+    DEFAULT_MAX_TRAIN_TOKENS=180000000
+    ;;
+  16k)
+    DEFAULT_TOKEN_MANIFEST="${PACKAGE_NAME}/data/processed/pretrain_en_longctx_16k_60m_bpe64k/manifest.json"
+    DEFAULT_OUT_DIR="${PACKAGE_NAME}/runs/stage2_16k_seq16384_rope_${ROPE_SCALING_TYPE}"
+    DEFAULT_SEQ_LEN=16384
+    DEFAULT_CONTEXT_LENGTH=32768
+    DEFAULT_MAX_TRAIN_TOKENS=60000000
+    ;;
+  *)
+    echo "Unknown STAGE2_PHASE=${STAGE2_PHASE}; expected 4k, 8k, or 16k" >&2
+    exit 2
+    ;;
+esac
+
 GPU_IDS="${GPU_IDS:-0}"
 NPROC_PER_NODE="${NPROC_PER_NODE:-1}"
-TOKEN_MANIFEST="${TOKEN_MANIFEST:-${PACKAGE_NAME}/data/processed/pretrain_en_longctx_500m_bpe64k/manifest.json}"
+TOKEN_MANIFEST="${TOKEN_MANIFEST:-${DEFAULT_TOKEN_MANIFEST}}"
 TOKENIZER_JSON="${TOKENIZER_JSON:-${PACKAGE_NAME}/tokenizers/bpe_64k_clean/tokenizer.json}"
-RESUME_FROM="${RESUME_FROM:-${PACKAGE_NAME}/runs/stage1_base_seq2048/checkpoint_last.pt}"
-OUT_DIR="${OUT_DIR:-${PACKAGE_NAME}/runs/stage2_longctx_seq4096}"
+RESUME_FROM="${RESUME_FROM:-${PACKAGE_NAME}/runs/stage1_5b_seq2048_g4_7_bs24_ga1_flash/checkpoint_last.pt}"
+OUT_DIR="${OUT_DIR:-${DEFAULT_OUT_DIR}}"
 NO_LOAD_OPTIMIZER="${NO_LOAD_OPTIMIZER:-1}"
 RESET_PROGRESS="${RESET_PROGRESS:-1}"
+GRADIENT_CHECKPOINTING="${GRADIENT_CHECKPOINTING:-1}"
 
-SEQ_LEN="${SEQ_LEN:-4096}"
-CONTEXT_LENGTH="${CONTEXT_LENGTH:-8192}"
+SEQ_LEN="${SEQ_LEN:-${DEFAULT_SEQ_LEN}}"
+CONTEXT_LENGTH="${CONTEXT_LENGTH:-${DEFAULT_CONTEXT_LENGTH}}"
 BATCH_SIZE="${BATCH_SIZE:-1}"
 GRAD_ACCUM_STEPS="${GRAD_ACCUM_STEPS:-16}"
-MAX_TRAIN_TOKENS="${MAX_TRAIN_TOKENS:-500000000}"
+MAX_TRAIN_TOKENS="${MAX_TRAIN_TOKENS:-${DEFAULT_MAX_TRAIN_TOKENS}}"
 MAX_STEPS="${MAX_STEPS:-}"
 LR="${LR:-1e-4}"
 MIN_LR="${MIN_LR:-1e-5}"
@@ -52,6 +89,8 @@ args=(
   --log_every "${LOG_EVERY}"
   --num_workers "${NUM_WORKERS}"
   --device cuda
+  --rope_scaling_type "${ROPE_SCALING_TYPE}"
+  --rope_original_context_length "${ROPE_ORIGINAL_CONTEXT_LENGTH}"
 )
 
 if [[ -n "${MAX_STEPS}" ]]; then
@@ -63,15 +102,34 @@ fi
 if [[ "${RESET_PROGRESS}" == "1" ]]; then
   args+=(--reset_progress)
 fi
+if [[ "${GRADIENT_CHECKPOINTING}" == "1" ]]; then
+  args+=(--gradient_checkpointing)
+fi
+if [[ -n "${ROPE_SCALING_FACTOR}" ]]; then
+  args+=(--rope_scaling_factor "${ROPE_SCALING_FACTOR}")
+fi
+if [[ -n "${YARN_BETA_FAST}" ]]; then
+  args+=(--yarn_beta_fast "${YARN_BETA_FAST}")
+fi
+if [[ -n "${YARN_BETA_SLOW}" ]]; then
+  args+=(--yarn_beta_slow "${YARN_BETA_SLOW}")
+fi
+if [[ -n "${YARN_ATTENTION_FACTOR}" ]]; then
+  args+=(--yarn_attention_factor "${YARN_ATTENTION_FACTOR}")
+fi
 
 echo "Stage 2 long-context continued pretraining"
 echo "  package: ${PACKAGE_NAME}"
+echo "  phase=${STAGE2_PHASE}"
 echo "  GPUs: ${GPU_IDS}  nproc: ${NPROC_PER_NODE}"
 echo "  resume_from=${RESUME_FROM}"
 echo "  token_manifest=${TOKEN_MANIFEST}"
 echo "  tokenizer_json=${TOKENIZER_JSON}"
 echo "  seq_len=${SEQ_LEN} context_length=${CONTEXT_LENGTH}"
 echo "  out_dir=${OUT_DIR}"
+echo "  gradient_checkpointing=${GRADIENT_CHECKPOINTING}"
+echo "  rope_scaling_type=${ROPE_SCALING_TYPE}"
+echo "  rope_original_context_length=${ROPE_ORIGINAL_CONTEXT_LENGTH}"
 
 if [[ "${NPROC_PER_NODE}" == "1" ]]; then
   python "${args[@]}"

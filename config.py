@@ -16,8 +16,15 @@ QWEN3_CONFIG = {
     "qk_norm": True,
     "n_kv_groups": 4,
     "rope_base": 1_000_000.0,
+    "rope_scaling_type": "none",
+    "rope_original_context_length": 4096,
+    "rope_scaling_factor": None,
+    "yarn_beta_fast": 32.0,
+    "yarn_beta_slow": 1.0,
+    "yarn_attention_factor": None,
     "attention_impl": "flash",
     "dtype": torch.bfloat16,
+    "gradient_checkpointing": False,
 }
 
 # 仅用于本仓库 CLI 冒烟 / CPU 试跑
@@ -32,6 +39,13 @@ QWEN3_SMOKE_CONFIG = {
     "qk_norm": True,
     "n_kv_groups": 2,
     "rope_base": 1_000_000.0,
+    "rope_scaling_type": "none",
+    "rope_original_context_length": 512,
+    "rope_scaling_factor": None,
+    "yarn_beta_fast": 32.0,
+    "yarn_beta_slow": 1.0,
+    "yarn_attention_factor": None,
     "attention_impl": "flash",
     "dtype": torch.bfloat16,
+    "gradient_checkpointing": False,
 }

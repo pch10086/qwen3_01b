@@ -5,6 +5,7 @@
 
 import torch
 import torch.nn as nn
+from torch.utils.checkpoint import checkpoint
 
 from .block import TransformerBlock
 from .norm import RMSNorm
@@ -27,6 +28,12 @@ class Qwen3Model(nn.Module):
             head_dim=head_dim,
             theta_base=cfg["rope_base"],
             context_length=cfg["context_length"],
+            scaling_type=cfg.get("rope_scaling_type", "none"),
+            original_context_length=cfg.get("rope_original_context_length"),
+            scaling_factor=cfg.get("rope_scaling_factor"),
+            yarn_beta_fast=cfg.get("yarn_beta_fast", 32.0),
+            yarn_beta_slow=cfg.get("yarn_beta_slow", 1.0),
+            yarn_attention_factor=cfg.get("yarn_attention_factor"),
         )
         self.register_buffer("cos", cos, persistent=False)
         self.register_buffer("sin", sin, persistent=False)
@@ -46,8 +53,12 @@ class Qwen3Model(nn.Module):
         else:
             mask = self._mask_cache[:num_tokens, :num_tokens]
 
+        use_gradient_checkpointing = bool(self.cfg.get("gradient_checkpointing", False)) and self.training
         for block in self.trf_blocks:
-            x = block(x, mask, self.cos, self.sin)
+            if use_gradient_checkpointing:
+                x = checkpoint(block, x, mask, self.cos, self.sin, use_reentrant=False)
+            else:
+                x = block(x, mask, self.cos, self.sin)
         x = self.final_norm(x)
         logits = self.out_head(x.to(self.cfg["dtype"]))
         return logits

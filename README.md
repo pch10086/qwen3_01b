@@ -77,15 +77,14 @@ cd /path/to/NLP大作业
 
 GPU_IDS=1,6,7 \
 NPROC_PER_NODE=3 \
-TOKEN_MANIFEST=qwen3_01b/data/processed/pretrain_en_longctx_500m_bpe64k/manifest.json \
+STAGE2_PHASE=4k \
 TOKENIZER_JSON=qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json \
-RESUME_FROM=qwen3_01b/runs/stage1_base_seq2048/checkpoint_last.pt \
-OUT_DIR=qwen3_01b/runs/stage2_longctx_seq4096 \
+RESUME_FROM=qwen3_01b/runs/stage1_5b_seq2048_g4_7_bs24_ga1_flash/checkpoint_last.pt \
 SEQ_LEN=4096 \
 CONTEXT_LENGTH=8192 \
 BATCH_SIZE=3 \
 GRAD_ACCUM_STEPS=2 \
-MAX_TRAIN_TOKENS=500000000 \
+MAX_TRAIN_TOKENS=360000000 \
 LR=1e-4 \
 MIN_LR=1e-5 \
 WARMUP_STEPS=200 \
@@ -94,7 +93,13 @@ LOG_EVERY=20 \
 scripts/pretrain_stage2_longctx.sh
 ```
 
-Stage 2 脚本默认带 `--no_load_optimizer --reset_progress`：只加载 Stage 1 模型权重，不继承旧 optimizer，并把本阶段 `step/tokens_seen` 从 0 重新记录。更长的 `8K/16K` 可以继续调大 `SEQ_LEN` 和 `CONTEXT_LENGTH`，但当前注意力实现是标准 `O(T^2)`，显存会随长度快速增长。
+Stage 2 脚本默认带 `--no_load_optimizer --reset_progress`：只加载 Stage 1 模型权重，不继承旧 optimizer，并把本阶段 `step/tokens_seen` 从 0 重新记录。脚本还默认开启 `--gradient_checkpointing`，并默认使用 `ROPE_SCALING_TYPE=none` 作为第一轮 baseline。可用阶段为 `STAGE2_PHASE=4k/8k/16k`，对应默认 manifest：
+
+- `data/processed/pretrain_en_longctx_4k_360m_bpe64k/manifest.json`
+- `data/processed/pretrain_en_longctx_8k_180m_bpe64k/manifest.json`
+- `data/processed/pretrain_en_longctx_16k_60m_bpe64k/manifest.json`
+
+RoPE 对比实验可把 `ROPE_SCALING_TYPE` 改为 `linear`、`ntk` 或 `yarn`。更长的 `8K/16K` 当前仍受标准全注意力 `O(T^2)` 约束，显存会随长度快速增长。
 
 ### 直接调用入口
 

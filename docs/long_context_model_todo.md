@@ -22,6 +22,26 @@ This note records the model and training work that still matters for the long-co
 
 These are important for long-context research, but they do not need to block Stage 1 base pretraining.
 
+### Stage 2 Training Preparation
+
+Stage 2 is split into three length phases instead of one flat 500M-token run:
+
+| Phase | Target tokens | Training length | Context length | Main mixture intent |
+|---|---:|---:|---:|---|
+| 4K | 360M | 4096 | 8192 | broad long-context adaptation with enough FineWeb-Edu replay to reduce forgetting |
+| 8K | 180M | 8192 | 16384 | stronger focus on papers and books, with smaller replay share |
+| 16K | 60M | 16384 | 32768 | only the longest, highest-value documents; mainly papers and books |
+
+The total Stage 2 budget is about 600M tokens. This is large enough to expose the model to long positions repeatedly, but small enough relative to Stage 1 that it should behave like continued pretraining rather than distribution replacement.
+
+The implemented builder is `scripts/build_stage2_longctx_manifests.py`. It reconstructs documents from the existing encoded Stage 1 token shards using the EOD token boundary, keeps naturally long documents, allocates each document to the longest eligible phase first, and writes separate manifests:
+
+- `data/processed/pretrain_en_longctx_4k_360m_bpe64k/manifest.json`
+- `data/processed/pretrain_en_longctx_8k_180m_bpe64k/manifest.json`
+- `data/processed/pretrain_en_longctx_16k_60m_bpe64k/manifest.json`
+
+Use `scripts/pretrain_stage2_longctx.sh` with `STAGE2_PHASE=4k`, `8k`, or `16k`. The default training baseline is `ROPE_SCALING_TYPE=none`; `linear`, `ntk`, and `yarn` are implemented for later ablations.
+
 ### Long-Context Evaluation
 
 Add lightweight long-context probes before Stage 2:
@@ -35,24 +55,34 @@ These should be added before claiming long-context ability, but they are not req
 
 ### Stage 2 Long-Document Data
 
-Build `data/processed/pretrain_en_longctx_500m_bpe64k/manifest.json` from naturally long documents. Stage 2 should preserve document order and prefer long papers, books, long math/tutorial content, and long encyclopedia articles. It should not be just random 4096-token windows from unrelated short snippets.
+Build the three phase manifests from naturally long documents:
+
+- `data/processed/pretrain_en_longctx_4k_360m_bpe64k/manifest.json`
+- `data/processed/pretrain_en_longctx_8k_180m_bpe64k/manifest.json`
+- `data/processed/pretrain_en_longctx_16k_60m_bpe64k/manifest.json`
+
+Stage 2 should preserve document order and prefer long papers, books, long math/tutorial content, and long encyclopedia articles. It should not be just random 4096-token windows from unrelated short snippets.
 
 ### RoPE Scaling Experiments
 
 Add explicit config support for long-context extension strategies:
 
 - no scaling baseline
-- NTK-aware scaling
 - linear position interpolation
-- YaRN-style scaling if needed
+- NTK-aware scaling
+- YaRN-style scaling
 
 The Stage 1 baseline can use the current RoPE setup; these variants are for Stage 2 and ablation.
+
+Implementation status: `none`, `linear`, `ntk`, and `yarn` are available through `--rope_scaling_type`. Keep `none` for the first Stage 2 baseline, then rerun selected phases with the other strategies for controlled comparison.
 
 ## Deferred P1 Items
 
 ### Activation Checkpointing
 
 Add a `gradient_checkpointing` config or CLI flag before serious `4096/8192/16384` training. This reduces activation memory at the cost of extra compute.
+
+Implementation status: `--gradient_checkpointing` is available in `cli_pretrain.py` and Stage 2 scripts enable it by default.
 
 ### KV Cache Inference
 

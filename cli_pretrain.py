@@ -82,6 +82,13 @@ def parse_args():
     p.add_argument("--eval_every", type=int, default=0)
     p.add_argument("--eval_iter", type=int, default=10)
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--gradient_checkpointing", action="store_true", help="对 Transformer block 启用 activation checkpointing")
+    p.add_argument("--rope_scaling_type", choices=["none", "linear", "ntk", "yarn"], default=None)
+    p.add_argument("--rope_original_context_length", type=int, default=None)
+    p.add_argument("--rope_scaling_factor", type=float, default=None)
+    p.add_argument("--yarn_beta_fast", type=float, default=None)
+    p.add_argument("--yarn_beta_slow", type=float, default=None)
+    p.add_argument("--yarn_attention_factor", type=float, default=None)
     p.add_argument("--device", type=str, default="auto")
     p.add_argument("--no_amp", action="store_true", help="关闭 CUDA bf16 autocast")
     p.add_argument("--tiny", action="store_true", help="使用极小模型，仅用于冒烟")
@@ -166,6 +173,19 @@ def main():
             cfg["context_length"] = max(int(cfg["context_length"]), args.seq_len + 1)
         if args.seq_len >= cfg["context_length"]:
             raise SystemExit("seq_len 必须小于 context_length，请增大 --context_length")
+        cfg["gradient_checkpointing"] = bool(args.gradient_checkpointing)
+        if args.rope_scaling_type is not None:
+            cfg["rope_scaling_type"] = args.rope_scaling_type
+        if args.rope_original_context_length is not None:
+            cfg["rope_original_context_length"] = args.rope_original_context_length
+        if args.rope_scaling_factor is not None:
+            cfg["rope_scaling_factor"] = args.rope_scaling_factor
+        if args.yarn_beta_fast is not None:
+            cfg["yarn_beta_fast"] = args.yarn_beta_fast
+        if args.yarn_beta_slow is not None:
+            cfg["yarn_beta_slow"] = args.yarn_beta_slow
+        if args.yarn_attention_factor is not None:
+            cfg["yarn_attention_factor"] = args.yarn_attention_factor
 
         dataset, data_meta = build_dataset(args, cfg)
         train_ds, val_ds = split_dataset(dataset, args.val_ratio, args.seed)
