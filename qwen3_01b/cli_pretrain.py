@@ -5,9 +5,9 @@
 典型用法:
 
   python -m qwen3_01b.cli_pretrain \
-    --token_manifest qwen3_01b/data/processed/pretrain_en_10b_bpe64k/manifest.json \
-    --tokenizer_json qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json \
-    --out_dir qwen3_01b/runs/pretrain_base \
+    --token_manifest data/processed/pretrain_en_10b_bpe64k/manifest.json \
+    --tokenizer_json tokenizers/bpe_64k_clean/tokenizer.json \
+    --out_dir runs/pretrain_base \
     --seq_len 2048 --batch_size 1 --grad_accum_steps 32
 """
 

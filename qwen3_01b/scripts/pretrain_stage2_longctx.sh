@@ -2,9 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PKG_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PROJECT_ROOT="$(cd "${PKG_DIR}/.." && pwd)"
-PACKAGE_NAME="${PACKAGE_NAME:-$(basename "${PKG_DIR}")}"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PACKAGE_NAME="${PACKAGE_NAME:-qwen3_01b}"
 cd "${PROJECT_ROOT}"
 
 STAGE2_PHASE="${STAGE2_PHASE:-4k}"
@@ -17,22 +16,22 @@ YARN_ATTENTION_FACTOR="${YARN_ATTENTION_FACTOR:-}"
 
 case "${STAGE2_PHASE}" in
   4k)
-    DEFAULT_TOKEN_MANIFEST="${PACKAGE_NAME}/data/processed/pretrain_en_longctx_4k_360m_bpe64k/manifest.json"
-    DEFAULT_OUT_DIR="${PACKAGE_NAME}/runs/stage2_4k_seq4096_rope_${ROPE_SCALING_TYPE}"
+    DEFAULT_TOKEN_MANIFEST="data/processed/pretrain_en_longctx_4k_360m_bpe64k/manifest.json"
+    DEFAULT_OUT_DIR="runs/stage2_4k_seq4096_rope_${ROPE_SCALING_TYPE}"
     DEFAULT_SEQ_LEN=4096
     DEFAULT_CONTEXT_LENGTH=8192
     DEFAULT_MAX_TRAIN_TOKENS=360000000
     ;;
   8k)
-    DEFAULT_TOKEN_MANIFEST="${PACKAGE_NAME}/data/processed/pretrain_en_longctx_8k_180m_bpe64k/manifest.json"
-    DEFAULT_OUT_DIR="${PACKAGE_NAME}/runs/stage2_8k_seq8192_rope_${ROPE_SCALING_TYPE}"
+    DEFAULT_TOKEN_MANIFEST="data/processed/pretrain_en_longctx_8k_180m_bpe64k/manifest.json"
+    DEFAULT_OUT_DIR="runs/stage2_8k_seq8192_rope_${ROPE_SCALING_TYPE}"
     DEFAULT_SEQ_LEN=8192
     DEFAULT_CONTEXT_LENGTH=16384
     DEFAULT_MAX_TRAIN_TOKENS=180000000
     ;;
   16k)
-    DEFAULT_TOKEN_MANIFEST="${PACKAGE_NAME}/data/processed/pretrain_en_longctx_16k_60m_bpe64k/manifest.json"
-    DEFAULT_OUT_DIR="${PACKAGE_NAME}/runs/stage2_16k_seq16384_rope_${ROPE_SCALING_TYPE}"
+    DEFAULT_TOKEN_MANIFEST="data/processed/pretrain_en_longctx_16k_60m_bpe64k/manifest.json"
+    DEFAULT_OUT_DIR="runs/stage2_16k_seq16384_rope_${ROPE_SCALING_TYPE}"
     DEFAULT_SEQ_LEN=16384
     DEFAULT_CONTEXT_LENGTH=32768
     DEFAULT_MAX_TRAIN_TOKENS=60000000
@@ -46,8 +45,8 @@ esac
 GPU_IDS="${GPU_IDS:-0}"
 NPROC_PER_NODE="${NPROC_PER_NODE:-1}"
 TOKEN_MANIFEST="${TOKEN_MANIFEST:-${DEFAULT_TOKEN_MANIFEST}}"
-TOKENIZER_JSON="${TOKENIZER_JSON:-${PACKAGE_NAME}/tokenizers/bpe_64k_clean/tokenizer.json}"
-RESUME_FROM="${RESUME_FROM:-${PACKAGE_NAME}/runs/stage1_5b_seq2048_g4_7_bs24_ga1_flash/checkpoint_last.pt}"
+TOKENIZER_JSON="${TOKENIZER_JSON:-tokenizers/bpe_64k_clean/tokenizer.json}"
+RESUME_FROM="${RESUME_FROM:-runs/stage1_5b_seq2048_g4_7_bs24_ga1_flash/checkpoint_last.pt}"
 OUT_DIR="${OUT_DIR:-${DEFAULT_OUT_DIR}}"
 NO_LOAD_OPTIMIZER="${NO_LOAD_OPTIMIZER:-1}"
 RESET_PROGRESS="${RESET_PROGRESS:-1}"

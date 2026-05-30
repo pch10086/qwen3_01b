@@ -1,0 +1,15 @@
+{
+  "model_name_or_path": "/home/public/bjh/dym/NLP/models/Qwen3-0.6B-Base",
+  "output_dir": "/home/public/bjh/dym/NLP/evaluation/outputs/qwen3_0_6b_base_smoke",
+  "context_lengths": [1024, 4096],
+  "positions": [0.0, 0.5, 1.0],
+  "samples_per_cell": 2,
+  "max_new_tokens": 16,
+  "temperature": 0.0,
+  "top_p": 1.0,
+  "seed": 20260528,
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "trust_remote_code": true,
+  "revision": "master"
+}

@@ -2,16 +2,15 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PKG_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PROJECT_ROOT="$(cd "${PKG_DIR}/.." && pwd)"
-PACKAGE_NAME="${PACKAGE_NAME:-$(basename "${PKG_DIR}")}"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PACKAGE_NAME="${PACKAGE_NAME:-qwen3_01b}"
 cd "${PROJECT_ROOT}"
 
 GPU_IDS="${GPU_IDS:-0}"
 NPROC_PER_NODE="${NPROC_PER_NODE:-1}"
-TOKEN_MANIFEST="${TOKEN_MANIFEST:-${PACKAGE_NAME}/data/processed/pretrain_en_10b_bpe64k/manifest.json}"
-TOKENIZER_JSON="${TOKENIZER_JSON:-${PACKAGE_NAME}/tokenizers/bpe_64k_clean/tokenizer.json}"
-OUT_DIR="${OUT_DIR:-${PACKAGE_NAME}/runs/stage1_base_seq2048}"
+TOKEN_MANIFEST="${TOKEN_MANIFEST:-data/processed/pretrain_en_10b_bpe64k/manifest.json}"
+TOKENIZER_JSON="${TOKENIZER_JSON:-tokenizers/bpe_64k_clean/tokenizer.json}"
+OUT_DIR="${OUT_DIR:-runs/stage1_base_seq2048}"
 RESUME_FROM="${RESUME_FROM:-}"
 NO_LOAD_OPTIMIZER="${NO_LOAD_OPTIMIZER:-0}"
 RESET_PROGRESS="${RESET_PROGRESS:-0}"

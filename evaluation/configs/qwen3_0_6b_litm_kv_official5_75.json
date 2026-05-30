@@ -1,0 +1,20 @@
+{
+  "model_name_or_path": "/home/public/bjh/dym/NLP/models/Qwen3-0.6B-Base",
+  "data_dir": "/home/public/bjh/dym/NLP/evaluation/benchmarks/lost_middle/data",
+  "output_dir": "/home/public/bjh/dym/NLP/evaluation/outputs/qwen3_0_6b_litm_kv_official5_75",
+  "num_keys": [75],
+  "positions": [0.0, 0.25, 0.5, 0.75, 1.0],
+  "samples_per_cell": 500,
+  "max_new_tokens": 64,
+  "batch_size": 64,
+  "temperature": 0.0,
+  "top_p": 1.0,
+  "seed": 20260528,
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "trust_remote_code": true,
+  "local_files_only": true,
+  "resume": true,
+  "include_prompt_in_predictions": false,
+  "summary_every": 25
+}

@@ -1,15 +1,13 @@
 """
 最小前向：随机初始化的 Qwen3 结构，验证 logits 形状。
-在包含 `qwen3_01b` 父目录的仓库根下执行:
-  python -m qwen3_01b.examples.minimal_forward
-或:
-  python qwen3_01b/examples/minimal_forward.py
+在仓库根目录下执行:
+  python examples/minimal_forward.py
 """
 import sys
 from pathlib import Path
 
-# 本文件: .../qwen3_01b/examples/minimal_forward.py -> parents[2] 为上级工程根
-_ROOT = Path(__file__).resolve().parents[2]
+# 本文件: .../examples/minimal_forward.py -> parents[1] 为仓库根
+_ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
