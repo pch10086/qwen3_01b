@@ -1,234 +1,200 @@
-# Benchmark v1/v2 Design: Evidence Position in Long Contexts
+# Benchmark v1/v2 设计：长上下文中的证据位置
 
-## Objective
+## 目标
 
-This benchmark suite studies how evidence position affects long-context behavior
-for a small pretrained language model. The immediate model is
-`Qwen3-0.6B-Base`. The self-trained checkpoint is intentionally excluded from
-this round because its long-context window is still being trained; it can later
-be evaluated with the same suite.
+这套基准用于研究证据位置如何影响小型预训练语言模型的长上下文行为。当前首先评测的模型是 `Qwen3-0.6B-Base`。本轮暂不纳入自训练 checkpoint，因为它的长上下文窗口仍在训练中；后续可以用同一套基准继续评测。
 
-The suite is deliberately narrow. It does not aim to report a broad leaderboard
-score. It aims to produce interpretable evidence for three questions:
+这套基准刻意保持较窄范围。它不追求给出宽泛的排行榜分数，而是希望为以下三个问题提供可解释证据：
 
-1. What happens when the relevant evidence is moved across the context?
-2. Does task difficulty or candidate confusion amplify the position effect?
-3. Which failures should later post-training target?
+1. 当相关证据在上下文中移动时，模型表现会发生什么变化？
+2. 任务难度或候选项混淆是否会放大位置效应？
+3. 后续 post-training 应优先针对哪些失败模式？
 
-## Related Work Rationale
+## 相关工作依据
 
-The suite uses existing benchmark protocols rather than a fully custom task.
+这套基准采用已有 benchmark protocol，而不是完全自定义任务。
 
-- **Lost in the Middle** studies how models use relevant information at
-  different positions in long inputs, using multi-document QA and key-value
-  retrieval. It directly motivates Benchmark v1.
-- **RULER** shows that simple needle-in-a-haystack tasks can overestimate
-  long-context ability, and provides configurable synthetic retrieval tasks.
-  It motivates Benchmark v2.
+- **Lost in the Middle** 研究模型如何利用长输入中不同位置的相关信息，任务包括多文档问答和 key-value 检索。它直接启发 Benchmark v1。
+- **RULER** 说明简单的 needle-in-a-haystack 任务可能高估模型的长上下文能力，并提供了可配置的合成检索任务。它启发 Benchmark v2。
 
-This gives the project external credibility while preserving the position-
-controlled analysis needed for the course project.
+这样既能让项目具备外部可信度，又能保留课程项目所需的、受位置控制的分析。
 
-## Model Scope
+## 模型范围
 
-Initial benchmark model:
+初始 benchmark 模型：
 
 - `Qwen3-0.6B-Base`
-- local path: `/home/public/bjh/dym/NLP/models/Qwen3-0.6B-Base`
+- 本地路径：`/home/public/bjh/dym/NLP/models/Qwen3-0.6B-Base`
 
-Excluded for now:
+当前暂不纳入：
 
 - `/home/public/bjh/dym/NLP/evaluation/Ours/checkpoint_step_20000.pt`
 
-Reason: the self-trained model currently has a 4K context configuration and is
-still an early checkpoint. It should be added after the target context window is
-trained, so comparisons are fair and meaningful.
+原因：自训练模型目前仍是 4K context 配置，并且还是较早期 checkpoint。应在目标上下文窗口训练完成后再加入评测，这样比较才公平且有意义。
 
-## Benchmark v1: Lost-in-the-Middle Subset
+## Benchmark v1：Lost-in-the-Middle 子集
 
-### Purpose
+### 目的
 
-Benchmark v1 is the main evidence-position benchmark. It follows the
-Lost-in-the-Middle style: keep the task fixed and move the gold evidence across
-the input. It has two subtests:
+Benchmark v1 是主要的证据位置 benchmark。它沿用 Lost-in-the-Middle 思路：保持任务不变，只移动 gold evidence 在输入中的位置。它包含两个子测试：
 
-- v1-a: key-value retrieval;
-- v1-b: multi-document QA.
+- v1-a：key-value 检索；
+- v1-b：多文档问答。
 
-The key-value task provides clean automatic scoring. The QA task provides a more
-natural setting and checks whether findings survive outside a synthetic table.
+key-value 任务便于进行干净的自动评分。QA 任务更接近自然场景，用来检查结论是否能从合成表格任务迁移到更自然的文本任务。
 
-### v1-a: Key-Value Retrieval
+### v1-a：Key-Value 检索
 
-Task:
+任务：
 
 ```text
-Input: many key-value pairs.
-Question: What is the value associated with key <K>?
-Answer: the target value.
+输入：大量 key-value pair。
+问题：key <K> 对应的 value 是什么？
+答案：目标 value。
 ```
 
-Controlled variables:
+控制变量：
 
-- number of key-value pairs: `75`, `140`, `300`, matching the official
-  Lost-in-the-Middle KV files available in the repository;
-- target pair position: `0%`, `10%`, `25%`, `50%`, `75%`, `90%`, `100%`;
-- examples per cell: `50`.
+- key-value pair 数量：`75`、`140`、`300`，对应仓库中已有的官方 Lost-in-the-Middle KV 文件；
+- 目标 pair 位置：`0%`、`10%`、`25%`、`50%`、`75%`、`90%`、`100%`；
+- 每个 cell 的样本数：`50`。
 
-Total planned examples:
+计划样本总数：
 
 ```text
-3 key-value sizes * 7 positions * 50 examples = 1050 examples
+3 种 key-value 规模 * 7 个位置 * 50 个样本 = 1050 个样本
 ```
 
-Primary metrics:
+主要指标：
 
-- `exact_match`;
-- `contains_value`;
-- `first_value_match`;
-- `format_error_rate`.
+- `exact_match`；
+- `contains_value`；
+- `first_value_match`；
+- `format_error_rate`。
 
-Expected analysis:
+预期分析：
 
-- line plot: accuracy vs target position, one line per key-value size;
-- heatmap: key-value size by target position;
-- format analysis: whether wrong strict exact match is a retrieval error or an
-  output-format error.
+- 折线图：accuracy vs target position，每条线对应一种 key-value 规模；
+- 热力图：key-value 规模 by target position；
+- 格式分析：严格 exact match 错误到底是检索错误，还是输出格式错误。
 
-Interpretation:
+解释方式：
 
-- If the middle positions drop while edges stay strong, the model shows a
-  Lost-in-the-Middle-style position effect in pure retrieval.
-- If performance only drops when the number of key-value pairs grows, candidate
-  confusion and memory load are likely major factors.
+- 如果中间位置表现下降，而两端表现较强，说明模型在纯检索任务中呈现 Lost-in-the-Middle 风格的位置效应。
+- 如果只有在 key-value pair 数量增加时性能才下降，那么候选项混淆和记忆负载很可能是主要因素。
 
-### v1-b: Multi-Document QA
+### v1-b：多文档问答
 
-Task:
+任务：
 
 ```text
-Input: a list of documents, one of which contains the answer.
-Question: answer using the documents.
-Answer: one of the known answer aliases.
+输入：一个文档列表，其中一个文档包含答案。
+问题：根据文档回答问题。
+答案：已知 answer alias 中的一个。
 ```
 
-Controlled variables:
+控制变量：
 
-- number of documents: `10`, `20`;
-- gold document position: `0%`, `25%`, `50%`, `75%`, `100%`;
-- examples per cell: `50`.
+- 文档数量：`10`、`20`；
+- gold document 位置：`0%`、`25%`、`50%`、`75%`、`100%`；
+- 每个 cell 的样本数：`50`。
 
-Total planned examples:
+计划样本总数：
 
 ```text
-2 document counts * 5 positions * 50 examples = 500 examples
+2 种文档数量 * 5 个位置 * 50 个样本 = 500 个样本
 ```
 
-Primary metrics:
+主要指标：
 
-- `answer_contains`;
-- `alias_match`;
-- `no_answer_rate`;
-- `format_error_rate`.
+- `answer_contains`；
+- `alias_match`；
+- `no_answer_rate`；
+- `format_error_rate`。
 
-Expected analysis:
+预期分析：
 
-- line plot: QA accuracy vs gold document position;
-- comparison: v1-a retrieval curve vs v1-b QA curve.
+- 折线图：QA accuracy vs gold document position；
+- 对比：v1-a 检索曲线 vs v1-b QA 曲线。
 
-Interpretation:
+解释方式：
 
-- If key-value retrieval is stable but QA drops, the bottleneck is probably not
-  pure retrieval; it may be semantic matching, answer generation, or instruction
-  following.
-- If both retrieval and QA show a middle drop, the position effect is more
-  fundamental.
+- 如果 key-value 检索稳定但 QA 下降，瓶颈可能不是纯检索，而是语义匹配、答案生成或指令跟随。
+- 如果检索和 QA 都出现中间位置下降，说明位置效应更基础。
 
-## Benchmark v2: RULER Subset
+## Benchmark v2：RULER 子集
 
-### Purpose
+### 目的
 
-Benchmark v2 diagnoses why simple single-needle tasks are insufficient. The
-previous smoke experiments showed that Qwen3-0.6B-Base can solve simple
-single-evidence numeric retrieval at 4K/8K/16K with perfect content accuracy.
-RULER-style variants add controlled difficulty through multiple keys, multiple
-values, and multiple queries.
+Benchmark v2 用于诊断为什么简单的 single-needle 任务不够充分。之前的 smoke 实验显示，`Qwen3-0.6B-Base` 能在 4K/8K/16K 的简单单证据数字检索中达到完美的内容准确率。RULER 风格变体通过多个 key、多个 value 和多个 query 引入受控难度。
 
-### Selected Tasks
+### 选定任务
 
-Use a focused subset of RULER retrieval tasks:
+使用 RULER 检索任务中的一个聚焦子集：
 
-- single-needle retrieval: easy baseline;
-- multi-key retrieval: multiple candidate keys, one queried key;
-- multi-value retrieval: one key associated with multiple required values;
-- multi-query retrieval: several queries in the same prompt.
+- single-needle retrieval：简单 baseline；
+- multi-key retrieval：多个候选 key，只查询其中一个 key；
+- multi-value retrieval：一个 key 对应多个需要回答的 value；
+- multi-query retrieval：同一个 prompt 中包含多个 query。
 
-The exact RULER task names should follow the official implementation available
-in the repository. If official task names differ, map them to the four semantic
-categories above and document the mapping in each run config.
+具体 RULER 任务名应遵循仓库中的官方实现。如果官方任务名不同，则将其映射到以上四个语义类别，并在每次 run config 中记录映射关系。
 
-### Planned Configuration
+### 计划配置
 
-Context lengths:
+上下文长度：
 
 ```text
 4K, 8K, 16K, 32K
 ```
 
-Examples:
+样本数：
 
 ```text
-50 examples per task and context length
+每个任务、每个上下文长度 50 个样本
 ```
 
-Position handling:
+位置处理：
 
-- Prefer RULER's official generation settings for comparability.
-- If the official generator exposes evidence positions, also run a
-  position-stratified slice at `0%`, `25%`, `50%`, `75%`, `100%`.
-- If position is not directly exposed, record the generated evidence position
-  from the prompt and analyze it post hoc.
+- 优先使用 RULER 的官方生成设置，以保证可比性。
+- 如果官方 generator 暴露证据位置参数，则额外运行一个按位置分层的 slice：`0%`、`25%`、`50%`、`75%`、`100%`。
+- 如果位置不能直接控制，则从生成的 prompt 中记录证据位置，并在事后进行分析。
 
-Primary metrics:
+主要指标：
 
-- `exact_match`;
-- `partial_match`;
-- `missing_value_rate`;
-- `wrong_key_rate`;
-- `wrong_value_rate`.
+- `exact_match`；
+- `partial_match`；
+- `missing_value_rate`；
+- `wrong_key_rate`；
+- `wrong_value_rate`。
 
-Expected analysis:
+预期分析：
 
-- accuracy vs context length;
-- accuracy by RULER task variant;
-- if position is available, accuracy vs evidence position;
-- error-type breakdown by task variant.
+- accuracy vs context length；
+- accuracy by RULER task variant；
+- 如果位置可用，则分析 accuracy vs evidence position；
+- 按任务变体拆分 error type。
 
-Interpretation:
+解释方式：
 
-- If single-needle retrieval remains strong but multi-key retrieval drops,
-  simple NIAH is overestimating model ability.
-- If multi-query retrieval drops more than multi-key retrieval, capacity and
-  multi-target tracking are central weaknesses.
-- If errors are dominated by wrong-key predictions, post-training should include
-  hard negative retrieval examples.
+- 如果 single-needle retrieval 仍然很强，但 multi-key retrieval 下降，说明简单 NIAH 高估了模型能力。
+- 如果 multi-query retrieval 比 multi-key retrieval 下降更多，说明容量和多目标追踪是核心弱点。
+- 如果错误主要是 wrong-key prediction，后续 post-training 应加入 hard negative retrieval 样本。
 
-## Execution Order
+## 执行顺序
 
-1. Implement or adapt v1-a key-value retrieval first.
-2. Run v1-a at full planned size for `Qwen3-0.6B-Base`.
-3. Inspect the position curve and error formatting.
-4. Implement or adapt v1-b multi-document QA.
-5. Run v1-b and compare retrieval vs QA behavior.
-6. Add the RULER subset and run task/context-length diagnostics.
-7. Produce plots and a short result memo before designing post-training.
+1. 先实现或适配 v1-a key-value 检索。
+2. 对 `Qwen3-0.6B-Base` 跑完 v1-a 的完整计划规模。
+3. 检查位置曲线和输出格式错误。
+4. 实现或适配 v1-b 多文档 QA。
+5. 运行 v1-b，并比较 retrieval 与 QA 行为。
+6. 加入 RULER 子集，运行任务/上下文长度诊断。
+7. 在设计 post-training 前，产出图表和简短结果 memo。
 
-This order keeps the work efficient: the first result should already provide a
-position curve, while later tasks add naturalness and diagnostic depth.
+这个顺序能保持工作效率：第一个结果就能提供位置曲线，后续任务再补充自然性和诊断深度。
 
-## Output Structure
+## 输出结构
 
-Recommended directory layout:
+推荐目录结构：
 
 ```text
 /home/public/bjh/dym/NLP/evaluation/
@@ -247,41 +213,37 @@ Recommended directory layout:
     benchmark_v1_v2_design.md
 ```
 
-Each run should write:
+每次运行应写出：
 
-- `run_config.json`;
-- `examples.jsonl`;
-- `predictions.jsonl`;
-- `summary.csv`;
-- optional plot files under `plots/`.
+- `run_config.json`；
+- `examples.jsonl`；
+- `predictions.jsonl`；
+- `summary.csv`；
+- 可选图表文件，放在 `plots/` 下。
 
-## Reporting Plan
+## 报告计划
 
-The benchmark section of the final report should emphasize curves and error
-types rather than only aggregate scores.
+最终报告中的 benchmark 部分应重点展示曲线和错误类型，而不是只报告 aggregate score。
 
-Core figures:
+核心图表：
 
-1. v1-a KV accuracy by evidence position and number of key-value pairs.
-2. v1-b QA accuracy by gold document position and document count.
-3. KV vs QA comparison showing whether pure retrieval and natural QA fail in the
-   same way.
-4. RULER task difficulty curve across context lengths.
-5. Error-type stacked bars for RULER variants.
+1. v1-a KV accuracy by evidence position and number of key-value pairs。
+2. v1-b QA accuracy by gold document position and document count。
+3. KV vs QA 对比，用于判断纯检索和自然 QA 是否以相同方式失败。
+4. RULER task difficulty curve across context lengths。
+5. RULER variants 的 error-type stacked bar。
 
-Core conclusions to look for:
+重点关注的核心结论：
 
-- whether Qwen3-0.6B-Base exhibits a middle-position weakness;
-- whether the weakness appears only under candidate confusion;
-- whether natural QA is harder than structured retrieval;
-- what post-training data should target first.
+- `Qwen3-0.6B-Base` 是否表现出中间位置弱点；
+- 该弱点是否只在候选项混淆时出现；
+- 自然 QA 是否比结构化检索更难；
+- post-training 数据应优先针对什么问题。
 
-## Implementation Constraints
+## 实现约束
 
-- Keep the first implementation model-agnostic but only run
-  `Qwen3-0.6B-Base` initially.
-- Do not include the self-trained checkpoint until its context window training
-  is ready.
-- Preserve the existing smoke benchmark outputs.
-- Use deterministic decoding for primary runs.
-- Report format errors separately from retrieval errors.
+- 第一版实现保持 model-agnostic，但初始只运行 `Qwen3-0.6B-Base`。
+- 在自训练 checkpoint 的上下文窗口训练完成前，不纳入该 checkpoint。
+- 保留已有 smoke benchmark 输出。
+- 主实验使用 deterministic decoding。
+- 将格式错误和检索错误分开报告。

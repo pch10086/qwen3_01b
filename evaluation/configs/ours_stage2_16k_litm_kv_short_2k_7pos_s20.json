@@ -1,0 +1,19 @@
+{
+  "repo_root": "/home/public/bjh/dym/qwen3_01b",
+  "checkpoint": "/home/public/bjh/dym/qwen3_01b/qwen3_01b/runs/stage2_16k_seq16384_rope_none/checkpoint_last.pt",
+  "tokenizer_json": "/home/public/bjh/dym/qwen3_01b/qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json",
+  "data_dir": "/home/public/bjh/dym/NLP/evaluation/benchmarks/lost_middle/data",
+  "output_dir": "/home/public/bjh/dym/NLP/evaluation/outputs/ours_stage2_16k_litm_kv_short_2k_7pos_s20",
+  "num_keys": [32, 40, 50],
+  "positions": [0.0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0],
+  "samples_per_cell": 20,
+  "max_new_tokens": 64,
+  "prompt_style": "completion",
+  "temperature": 0.0,
+  "top_k": null,
+  "seed": 20260530,
+  "device": "cuda",
+  "resume": false,
+  "include_prompt_in_predictions": false,
+  "summary_every": 20
+}
