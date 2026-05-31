@@ -57,7 +57,7 @@ class GroupedQueryAttention(nn.Module):
         else:
             self.q_norm = self.k_norm = None
 
-    def forward(self, x, mask, cos, sin):
+    def forward(self, x, mask, cos, sin, past_kv=None, use_cache=False, position_offset=0):
         b, num_tokens, _ = x.shape
 
         queries = self.W_query(x)
@@ -73,8 +73,14 @@ class GroupedQueryAttention(nn.Module):
         if self.k_norm:
             keys = self.k_norm(keys)
 
-        queries = apply_rope(queries, cos, sin)
-        keys = apply_rope(keys, cos, sin)
+        queries = apply_rope(queries, cos, sin, position_offset=position_offset)
+        keys = apply_rope(keys, cos, sin, position_offset=position_offset)
+
+        if past_kv is not None:
+            past_keys, past_values = past_kv
+            keys = torch.cat([past_keys, keys], dim=2)
+            values = torch.cat([past_values, values], dim=2)
+            mask = None
 
         keys = keys.repeat_interleave(self.group_size, dim=1)
         values = values.repeat_interleave(self.group_size, dim=1)
@@ -93,7 +99,7 @@ class GroupedQueryAttention(nn.Module):
                         values,
                         attn_mask=None,
                         dropout_p=0.0,
-                        is_causal=True,
+                        is_causal=past_kv is None,
                     )
             else:
                 context = F.scaled_dot_product_attention(
@@ -102,14 +108,21 @@ class GroupedQueryAttention(nn.Module):
                     values,
                     attn_mask=None,
                     dropout_p=0.0,
-                    is_causal=True,
+                    is_causal=past_kv is None,
                 )
             context = context.transpose(1, 2).reshape(b, num_tokens, self.d_out)
-            return self.out_proj(context)
+            out = self.out_proj(context)
+            if use_cache:
+                return out, (keys[:, :: self.group_size, :, :], values[:, :: self.group_size, :, :])
+            return out
 
         attn_scores = queries @ keys.transpose(2, 3)
-        attn_scores = attn_scores.masked_fill(mask, -torch.inf)
+        if mask is not None:
+            attn_scores = attn_scores.masked_fill(mask, -torch.inf)
         attn_weights = torch.softmax(attn_scores / self.head_dim**0.5, dim=-1)
 
         context = (attn_weights @ values).transpose(1, 2).reshape(b, num_tokens, self.d_out)
-        return self.out_proj(context)
+        out = self.out_proj(context)
+        if use_cache:
+            return out, (keys[:, :: self.group_size, :, :], values[:, :: self.group_size, :, :])
+        return out

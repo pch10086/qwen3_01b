@@ -26,14 +26,29 @@ class TransformerBlock(nn.Module):
         self.norm1 = RMSNorm(cfg["emb_dim"], eps=1e-6)
         self.norm2 = RMSNorm(cfg["emb_dim"], eps=1e-6)
 
-    def forward(self, x, mask, cos, sin):
+    def forward(self, x, mask, cos, sin, past_kv=None, use_cache=False, position_offset=0):
         shortcut = x
         x = self.norm1(x)
-        x = self.att(x, mask, cos, sin)
+        att_out = self.att(
+            x,
+            mask,
+            cos,
+            sin,
+            past_kv=past_kv,
+            use_cache=use_cache,
+            position_offset=position_offset,
+        )
+        if use_cache:
+            x, new_kv = att_out
+        else:
+            x = att_out
+            new_kv = None
         x = x + shortcut
 
         shortcut = x
         x = self.norm2(x)
         x = self.ff(x)
         x = x + shortcut
+        if use_cache:
+            return x, new_kv
         return x

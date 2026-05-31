@@ -108,7 +108,7 @@ def compute_rope_params(
     return cos, sin
 
 
-def apply_rope(x, cos, sin):
+def apply_rope(x, cos, sin, position_offset=0):
     # x: (batch_size, num_heads, seq_len, head_dim)
     batch_size, num_heads, seq_len, head_dim = x.shape
     assert head_dim % 2 == 0, "Head dimension must be even"
@@ -116,8 +116,12 @@ def apply_rope(x, cos, sin):
     x1 = x[..., : head_dim // 2]
     x2 = x[..., head_dim // 2:]
 
-    cos = cos[:seq_len, :].unsqueeze(0).unsqueeze(0)
-    sin = sin[:seq_len, :].unsqueeze(0).unsqueeze(0)
+    start = int(position_offset)
+    end = start + seq_len
+    if end > cos.shape[0]:
+        raise ValueError(f"RoPE position range [{start}, {end}) exceeds cache length {cos.shape[0]}")
+    cos = cos[start:end, :].unsqueeze(0).unsqueeze(0)
+    sin = sin[start:end, :].unsqueeze(0).unsqueeze(0)
 
     rotated = torch.cat((-x2, x1), dim=-1)
     x_rotated = (x * cos) + (rotated * sin)

@@ -40,11 +40,13 @@ class Qwen3Model(nn.Module):
         self.register_buffer("_mask_cache", torch.empty(0, 0, dtype=torch.bool), persistent=False)
         self.cfg = cfg
 
-    def forward(self, in_idx):
+    def forward(self, in_idx, past_key_values=None, use_cache=False, position_offset=0):
         tok_embeds = self.tok_emb(in_idx)
         x = tok_embeds
         num_tokens = x.shape[1]
-        if self._mask_cache.device != x.device or self._mask_cache.shape[0] < num_tokens:
+        if use_cache and past_key_values is not None:
+            mask = None
+        elif self._mask_cache.device != x.device or self._mask_cache.shape[0] < num_tokens:
             mask = torch.triu(
                 torch.ones(num_tokens, num_tokens, device=x.device, dtype=torch.bool),
                 diagonal=1,
@@ -54,11 +56,26 @@ class Qwen3Model(nn.Module):
             mask = self._mask_cache[:num_tokens, :num_tokens]
 
         use_gradient_checkpointing = bool(self.cfg.get("gradient_checkpointing", False)) and self.training
-        for block in self.trf_blocks:
+        new_past_key_values = [] if use_cache else None
+        for layer_idx, block in enumerate(self.trf_blocks):
+            past_kv = None if past_key_values is None else past_key_values[layer_idx]
             if use_gradient_checkpointing:
                 x = checkpoint(block, x, mask, self.cos, self.sin, use_reentrant=False)
+            elif use_cache:
+                x, new_kv = block(
+                    x,
+                    mask,
+                    self.cos,
+                    self.sin,
+                    past_kv=past_kv,
+                    use_cache=True,
+                    position_offset=position_offset,
+                )
+                new_past_key_values.append(new_kv)
             else:
                 x = block(x, mask, self.cos, self.sin)
         x = self.final_norm(x)
         logits = self.out_head(x.to(self.cfg["dtype"]))
+        if use_cache:
+            return logits, new_past_key_values
         return logits
