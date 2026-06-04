@@ -31,7 +31,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--retrieval-train-jsonl", default="data/processed/stage1r_retrieval_2k_bpe64k_v2/train_examples.jsonl")
     p.add_argument("--replay-manifest", default="data/processed/pretrain_en_5b_bpe64k/manifest.json")
     p.add_argument("--tokenizer-json", default="qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json")
-    p.add_argument("--checkpoint", default="qwen3_01b/runs/stage1r_v2b_retrieval_heavy_mixed_2k_120k_lr3e5/checkpoint_step_1000.pt")
+    p.add_argument("--checkpoint", default="qwen3_01b/runs/05_retrieval_heavy_mixed_v2b/checkpoint_step_1000.pt")
     p.add_argument("--out-dir", required=True)
     p.add_argument("--seq-len", type=int, default=2048)
     p.add_argument("--retrieval-batch-size", type=int, default=8)

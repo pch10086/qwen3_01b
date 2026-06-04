@@ -1,6 +1,6 @@
 # stage1_5b_seq2048_g4_7_bs24_ga1_flash Pretraining Curves
 
-Source log: `/home/public/bjh/dym/qwen3_01b/runs/stage1_5b_seq2048_g4_7_bs24_ga1_flash/train_log.jsonl`
+Source log: `/home/public/bjh/dym/qwen3_01b/runs/01_base_pretrain_2k/train_log.jsonl`
 
 ## Summary
 

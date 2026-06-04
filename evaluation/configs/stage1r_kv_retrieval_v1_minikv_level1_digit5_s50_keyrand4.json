@@ -1,0 +1,29 @@
+{
+  "repo_root": "/home/public/bjh/dym/NLP_longcontext",
+  "checkpoint": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/runs/09_kv_retrieval_v1/checkpoint_last.pt",
+  "tokenizer_json": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json",
+  "output_dir": "/home/public/bjh/dym/NLP_longcontext/evaluation/outputs/stage1r_kv_retrieval_v1_minikv_level1_digit5_s50_keyrand4",
+  "num_records": [
+    8,
+    16,
+    32
+  ],
+  "positions": [
+    0.0,
+    0.5,
+    1.0
+  ],
+  "samples_per_cell": 50,
+  "max_new_tokens": 8,
+  "temperature": 0.0,
+  "top_k": null,
+  "seed": 20260602,
+  "device": "cuda",
+  "resume": false,
+  "include_prompt_in_predictions": true,
+  "summary_every": 50,
+  "key_style": "item_random_4letters",
+  "value_type": "random_5digit",
+  "source_output_dir": "/home/public/bjh/dym/NLP_longcontext/evaluation/outputs/ours_stage1r_v3_minikv_level1_word_s50_keyrand4",
+  "value_random_seed": 20260603
+}

@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--repo-root", default="/home/public/bjh/dym/NLP_longcontext")
     p.add_argument("--train-jsonl", default="data/processed/stage1r_retrieval_2k_bpe64k_v1/train_examples.jsonl")
     p.add_argument("--tokenizer-json", default="qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json")
-    p.add_argument("--checkpoint", default="qwen3_01b/runs/stage1_5b_seq2048_g4_7_bs24_ga1_flash/checkpoint_last.pt")
+    p.add_argument("--checkpoint", default="qwen3_01b/runs/01_base_pretrain_2k/checkpoint_last.pt")
     p.add_argument("--out-dir", required=True)
     p.add_argument("--seq-len", type=int, default=2048)
     p.add_argument("--batch-size", type=int, default=16)

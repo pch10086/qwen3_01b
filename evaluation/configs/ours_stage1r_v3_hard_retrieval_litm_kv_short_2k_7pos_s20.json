@@ -1,6 +1,6 @@
 {
   "repo_root": "/home/public/bjh/dym/NLP_longcontext",
-  "checkpoint": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/runs/stage1r_v3_hard_retrieval_b2n4p16_from_v2b_step1000/checkpoint_last.pt",
+  "checkpoint": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/runs/08_hard_retrieval_v3/checkpoint_last.pt",
   "tokenizer_json": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json",
   "data_dir": "/home/public/bjh/dym/NLP_longcontext/evaluation/benchmarks/lost_middle/data",
   "output_dir": "/home/public/bjh/dym/NLP_longcontext/evaluation/outputs/ours_stage1r_v3_hard_retrieval_litm_kv_short_2k_7pos_s20",
