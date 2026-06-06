@@ -57,6 +57,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--seed", type=int, default=20260603)
     p.add_argument("--device", default="auto")
     p.add_argument("--no-amp", action="store_true")
+    p.add_argument("--rope-scaling-type", choices=["none", "linear", "ntk", "yarn"], default=None)
+    p.add_argument("--rope-original-context-length", type=int, default=None)
+    p.add_argument("--rope-scaling-factor", type=float, default=None)
+    p.add_argument("--yarn-beta-fast", type=float, default=None)
+    p.add_argument("--yarn-beta-slow", type=float, default=None)
+    p.add_argument("--yarn-attention-factor", type=float, default=None)
     p.add_argument("--limit-retrieval-examples", type=int, default=None)
     p.add_argument("--dry-run-batches", type=int, default=0, help="Run this many train batches then exit; for smoke tests.")
     return p.parse_args()
@@ -244,6 +250,18 @@ def main() -> int:
     cfg = config_from_storable(ckpt["config"])
     cfg["context_length"] = max(int(cfg.get("context_length", 4096)), args.seq_len + 1)
     cfg["gradient_checkpointing"] = False
+    if args.rope_scaling_type is not None:
+        cfg["rope_scaling_type"] = args.rope_scaling_type
+    if args.rope_original_context_length is not None:
+        cfg["rope_original_context_length"] = args.rope_original_context_length
+    if args.rope_scaling_factor is not None:
+        cfg["rope_scaling_factor"] = args.rope_scaling_factor
+    if args.yarn_beta_fast is not None:
+        cfg["yarn_beta_fast"] = args.yarn_beta_fast
+    if args.yarn_beta_slow is not None:
+        cfg["yarn_beta_slow"] = args.yarn_beta_slow
+    if args.yarn_attention_factor is not None:
+        cfg["yarn_attention_factor"] = args.yarn_attention_factor
 
     device = get_device(args.device)
     out_dir = resolve(root, args.out_dir)

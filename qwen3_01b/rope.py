@@ -87,7 +87,9 @@ def compute_rope_params(
         low = max(0, min(low, head_dim // 2 - 1))
         high = max(low + 1, min(high, head_dim // 2))
         ramp = _linear_ramp_mask(low, high, head_dim // 2, dtype=dtype)
-        inv_freq = interpolation_inv_freq * (1.0 - ramp) + extrapolation_inv_freq * ramp
+        # YaRN keeps high-frequency dimensions extrapolated and gradually
+        # interpolates lower-frequency dimensions.
+        inv_freq = extrapolation_inv_freq * (1.0 - ramp) + interpolation_inv_freq * ramp
 
     positions = torch.arange(context_length, dtype=dtype)
     if scaling_type == "linear" and scale > 1.0:

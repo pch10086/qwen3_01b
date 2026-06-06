@@ -1,0 +1,20 @@
+{
+  "repo_root": "/home/public/bjh/dym/NLP_longcontext",
+  "checkpoint": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/runs/stage2_kv_4k_rope_yarn_fixed_from_stage1r_kv_v1/checkpoint_last.pt",
+  "tokenizer_json": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json",
+  "output_dir": "/home/public/bjh/dym/NLP_longcontext/evaluation/outputs/stage2_kv4k_rope_yarn_fixed_minikv_digit8_frontpos_0_1_2_5_10_len2k4k_s100",
+  "target_tokens": [2048, 4000],
+  "positions": [0.0, 0.01, 0.02, 0.05, 0.10],
+  "samples_per_cell": 100,
+  "max_new_tokens": 12,
+  "temperature": 0.0,
+  "top_k": null,
+  "seed": 20260605,
+  "device": "cuda",
+  "resume": false,
+  "include_prompt_in_predictions": false,
+  "summary_every": 100,
+  "key_letters": 4,
+  "value_digits": 8,
+  "token_tolerance": 24
+}

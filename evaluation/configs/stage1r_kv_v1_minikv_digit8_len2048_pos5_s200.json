@@ -1,0 +1,20 @@
+{
+  "repo_root": "/home/public/bjh/dym/NLP_longcontext",
+  "checkpoint": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/runs/09_kv_retrieval_v1/checkpoint_last.pt",
+  "tokenizer_json": "/home/public/bjh/dym/NLP_longcontext/qwen3_01b/tokenizers/bpe_64k_clean/tokenizer.json",
+  "output_dir": "/home/public/bjh/dym/NLP_longcontext/evaluation/outputs/stage1r_kv_v1_minikv_digit8_len2048_pos5_s200",
+  "target_tokens": [2048],
+  "positions": [0.0, 0.25, 0.5, 0.75, 1.0],
+  "samples_per_cell": 200,
+  "max_new_tokens": 12,
+  "temperature": 0.0,
+  "top_k": null,
+  "seed": 20260604,
+  "device": "cuda",
+  "resume": false,
+  "include_prompt_in_predictions": false,
+  "summary_every": 100,
+  "key_letters": 4,
+  "value_digits": 8,
+  "token_tolerance": 24
+}
